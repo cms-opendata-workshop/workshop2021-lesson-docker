@@ -139,4 +139,68 @@ docker run -it --name my_od -P -p 5901:5901 -v ${HOME}/cms_open_data_work:/home/
 
 ### Downloading and start
 
+Start the image download and open the container with
+
+~~~
+docker run -it --name my_od -P -p 5901:5901 cmsopendata/cmssw_5_3_32_vnc:latest /bin/bash
+~~~
+{: .language-bash}
+
+~~~
+Setting up CMSSW_5_3_32
+CMSSW should now be available.
+~/CMSSW_5_3_32/src $
+~~~
+{: .output}
+
+This is now a bash shell in the CMS open data environment in which you have access to a complete CMS software release that is appropriate for interfacing with the 2011 and 2012 7 and 8 TeV datasets.
+
+If the docker command exits without giving you the output above, see this post in the CERN Open Data forum (note in particular that the `.wslconfig` file that you need to add must not have a file extension, if Windows adds it automatically, rename the file).
+
+Now let's understand the options that were used for the `docker run` command.
+
+* First, the `-it` (or `-i`) option means to start the container in interactive mode. Essentially, it means that you will end up inside the running container.
+* We assign a name to the container using the `--name` switch, so that we can refer back to this environment and still access any files we created in there. You can, of course, choose a different name than `my_od`.
+* The options `-P -p 5901:5901` open/publish a port from the container to the local host, needed for the graphical windows
+* `cmsopendata/cmssw_5_3_32_vnc:latest` is the name (and `:version`) of the image we will use.  If no label is prepended, Docker assumes that it resides in [Docker Hub](https://hub.docker.com/), the official image repository of Docker.
+* Finally, the `/bin/bash` option will throw the container into a `bash` shell when running interactively.
+
+For a more complete listing of options, see [the official Docker documentation](https://docs.docker.com/engine/reference/commandline/container_run/) on the `docker run` command.
+
+This container has a VNC application installed to allow opening graphical windows on a remote machine (seen from the container, your own computer is a remote machine). Start the application with `start_vnc` from your container prompt, and choose a password. You will need to start it every time you use the container (if you want to open graphics windows), but you will define the password only at the first time.
+
+~~~
+~/CMSSW_5_3_32/src $ start_vnc
+~~~
+{: .language-bash}
+
+~~~
+You will require a password to access your desktops.
+
+Password:
+Verify:
+xauth:  file /home/cmsusr/.Xauthority does not exist
+
+New 'myvnc:1' desktop is e0ca768960bf:1
+
+Starting applications specified in /home/cmsusr/.vnc/xstartup
+Log file is /home/cmsusr/.vnc/e0ca768960bf:1.log
+
+VNC connection points:
+        VNC viewer address: 127.0.0.1:5901
+        OSX built-in VNC viewer command: open vnc://127.0.0.1:5901
+        To kill the vncserver enter 'vncserver -kill :1'
+~~~
+{: .output}
+
+You can access the GUI in the Mac VNC viewer. The first time you do this, enter your computer's "Settings" menu and turn on "screen sharing" from the "Computer Settings" options, then click on "VNC Viewers" and enter the password you chose. Open the VNC viewer from "Finder" by choosing "connect to server" from the "Go" tab. Paste the "MacOS" address given in the container's VNC startup message and connect. It opens with an xterminal of your container. To test, start ROOT by typing `root` in the container terminal prompt. In the ROOT prompt, type `TBrowser t` to open the ROOT graphical window. If the graphical window opens you are all set and you can exit from ROOT either by choosing the "Quit Root" option from Browser menu of the TBrowser window or by typing `.q` in the ROOT prompt.
+
+Importantly, take note of the command to kill the vncserver in the startup message, and before exiting the container type it in the container prompt. If you don't do it, you will not be able to open the graphics window next time you use the same container. Then exit the container.
+
+~~~
+~/CMSSW_5_3_32/src $ vncserver -kill :1
+~/CMSSW_5_3_32/src $ exit
+~~~
+{: .language-bash}
+
 ### Mounting a local volume example
